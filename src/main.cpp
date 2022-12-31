@@ -6,21 +6,30 @@ const char *ssid = "buzzer";
 const char *password = "123456789";
 
 const byte led = 2;
+bool ledOn = false;
 
 AsyncWebServer server(80);
+
+void onPlay(AsyncWebServerRequest *request)
+{
+  Serial.println("Toggling LED");
+  if (ledOn)
+  {
+    ledOn = false;
+    digitalWrite(led, LOW);
+  }
+  else
+  {
+    ledOn = true;
+    digitalWrite(led, HIGH);
+  }
+  request->send(200);
+}
 
 void setup()
 {
   // Setup serial
   Serial.begin(115200);
-  /*
-    Wait for serial monitor to be connected.
-    Remove this when running without computer.
-   */
-  while (!Serial)
-  {
-  }
-  Serial.println("\n");
   pinMode(led, OUTPUT);
   digitalWrite(led, LOW);
 
@@ -37,7 +46,7 @@ void setup()
   while (file)
   {
     Serial.print("File: ");
-    Serial.println(file.name());
+    Serial.println(file.path());
     file.close();
     file = root.openNextFile();
   }
@@ -49,23 +58,12 @@ void setup()
   Serial.println(WiFi.softAPIP());
 
   // Server
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send(SPIFFS, "/index.html", "text/html"); });
-  server.on("/w3.css", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send(SPIFFS, "/w3.css", "text/css"); });
-  server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send(SPIFFS, "/script.js", "text/javascript"); });
-  server.on("/play", HTTP_GET, [](AsyncWebServerRequest *request)
-            {
-              // TODO: play file through speaker
-              Serial.println("/play");
-              request->send(200); });
-  
+  server.on("/play", HTTP_GET, onPlay);
+  server.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
   server.begin();
   Serial.println("Server ready!");
 }
 
 void loop()
 {
-  // put your main code here, to run repeatedly:
 }
