@@ -2,29 +2,25 @@
 #include <ESPAsyncWebServer.h>
 #include <SPIFFS.h>
 #include <AsyncJson.h>
+#include <Audio.h>
 #include "creds.h"
 
 // #define B_WIFI_AP
 
-const byte led = 2;
-bool ledOn = false;
+#define I2S_DOUT 25
+#define I2S_BCLK 27
+#define I2S_LRC 26
+
 String selectedFile = "";
 
 AsyncWebServer server(80);
+Audio audio;
 
 void onPlay(AsyncWebServerRequest *request)
 {
-  Serial.println("Toggling LED");
-  if (ledOn)
-  {
-    ledOn = false;
-    digitalWrite(led, LOW);
-  }
-  else
-  {
-    ledOn = true;
-    digitalWrite(led, HIGH);
-  }
+  String path = "/music/" + selectedFile;
+  Serial.println("Playing file: " + path);
+  audio.connecttoFS(SPIFFS, path.c_str());
   request->send(200);
 }
 
@@ -67,25 +63,12 @@ void setup()
 {
   // Setup serial
   Serial.begin(115200);
-  pinMode(led, OUTPUT);
-  digitalWrite(led, LOW);
 
   // Setup SPIFFS
   if (!SPIFFS.begin())
   {
     Serial.println("SPIFFS error. Exiting.");
     return;
-  }
-
-  // List existing files
-  File root = SPIFFS.open("/music");
-  File file = root.openNextFile();
-  if (file)
-  {
-    String fileName = file.name();
-    if (!fileName.startsWith("."))
-      selectedFile = fileName;
-    file.close();
   }
 
   // Wifi
@@ -100,8 +83,9 @@ void setup()
   while (WiFi.status() != WL_CONNECTED)
   {
     Serial.print(".");
-    delay(100);
+    delay(500);
   }
+  Serial.println();
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 #endif
@@ -116,6 +100,9 @@ void setup()
   server.begin();
 
   Serial.println("Server ready!");
+
+  audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
+  audio.setVolume(21); // Max 21
 }
 
 void loop()
