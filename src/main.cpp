@@ -110,6 +110,8 @@ void setup()
   server.on("/play", HTTP_GET, onPlay);
   server.on("/available-files", HTTP_GET, onAvailableFiles);
   server.on("/select-file", HTTP_POST, onSelectFile);
+  server.onNotFound([](AsyncWebServerRequest *request)
+                    { request->send(404); });
   server.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
   server.begin();
 
