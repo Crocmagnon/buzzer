@@ -11,6 +11,8 @@
 #define I2S_BCLK 27
 #define I2S_LRC 26
 
+#define LED 2
+
 String selectedFile = "";
 
 AsyncWebServer server(80);
@@ -63,6 +65,8 @@ void setup()
 {
   // Setup serial
   Serial.begin(115200);
+  pinMode(LED, OUTPUT);
+  digitalWrite(LED, LOW);
 
   // Setup SPIFFS
   if (!SPIFFS.begin())
@@ -118,6 +122,8 @@ void setup()
 
   audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
   audio.setVolume(21); // Max 21
+
+  digitalWrite(LED, HIGH);
 }
 
 void loop()
