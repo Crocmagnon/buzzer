@@ -80,16 +80,15 @@ void setup()
   // List existing files
   File root = SPIFFS.open("/music");
   File file = root.openNextFile();
-  while (file)
+  if (file)
   {
     String fileName = file.name();
-    if (selectedFile == "" && !fileName.startsWith("."))
+    if (!fileName.startsWith("."))
       selectedFile = fileName;
     file.close();
-    file = root.openNextFile();
   }
 
-// Wifi
+  // Wifi
 #ifdef B_WIFI_AP
   Serial.println("Setting up AP...");
   WiFi.softAP(ssid, password);
@@ -113,6 +112,7 @@ void setup()
   server.on("/select-file", HTTP_POST, onSelectFile);
   server.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
   server.begin();
+
   Serial.println("Server ready!");
 }
 
