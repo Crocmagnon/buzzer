@@ -71,6 +71,21 @@ void setup()
     return;
   }
 
+  File root = SPIFFS.open("/music");
+  File file = root.openNextFile();
+  while (file)
+  {
+    String fileName = file.name();
+    if (!fileName.startsWith("."))
+    {
+      selectedFile = fileName;
+      Serial.println("Selected " + fileName);
+      break;
+    }
+    file.close();
+    file = root.openNextFile();
+  }
+
   // Wifi
 #ifdef B_WIFI_AP
   Serial.println("Setting up AP...");
