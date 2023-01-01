@@ -32,7 +32,7 @@ void onAvailableFiles(AsyncWebServerRequest *request)
 {
   Serial.println("Available files");
   AsyncResponseStream *response = request->beginResponseStream("application/json");
-  
+
   DynamicJsonDocument root(256);
   root["selectedFile"] = selectedFile;
   JsonArray files = root.createNestedArray("files");
@@ -40,15 +40,14 @@ void onAvailableFiles(AsyncWebServerRequest *request)
   File file = music.openNextFile();
   while (file)
   {
-    Serial.print("File: ");
     String fileName = file.name();
-    Serial.println(fileName);
-    files.add(fileName);
+    if (!fileName.startsWith("."))
+      files.add(fileName);
     file.close();
     file = music.openNextFile();
   }
   serializeJson(root, *response);
-  
+
   request->send(response);
 }
 
@@ -61,7 +60,7 @@ void onSelectFile(AsyncWebServerRequest *request)
     Serial.print(selectedFile);
   }
   Serial.println();
-  request->send(200);
+  onAvailableFiles(request);
 }
 
 void setup()
@@ -79,12 +78,13 @@ void setup()
   }
 
   // List existing files
-  File root = SPIFFS.open("/");
+  File root = SPIFFS.open("/music");
   File file = root.openNextFile();
   while (file)
   {
-    Serial.print("File: ");
-    Serial.println(file.path());
+    String fileName = file.name();
+    if (selectedFile == "" && !fileName.startsWith("."))
+      selectedFile = fileName;
     file.close();
     file = root.openNextFile();
   }
