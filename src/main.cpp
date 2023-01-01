@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
 #include <SPIFFS.h>
+#include "creds.h"
 
-const char *ssid = "buzzer";
-const char *password = "123456789";
+// #define B_WIFI_AP
 
 const byte led = 2;
 bool ledOn = false;
@@ -51,11 +51,23 @@ void setup()
     file = root.openNextFile();
   }
 
-  // Wifi
+// Wifi
+#ifdef B_WIFI_AP
   Serial.println("Setting up AP...");
   WiFi.softAP(ssid, password);
   Serial.print("IP address: ");
   Serial.println(WiFi.softAPIP());
+#else
+  Serial.print("Connecting to wifi...");
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(100);
+  }
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+#endif
 
   // Server
   server.on("/play", HTTP_GET, onPlay);
