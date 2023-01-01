@@ -1,13 +1,11 @@
 function play() {
     console.log("Play...");
-    var xhttp = new XMLHttpRequest();
-    xhttp.open("GET", "play", true);
-    xhttp.send();
+    fetch("/play", { signal: AbortSignal.timeout(7000) });
 }
 
 function loadAvailableFiles() {
     console.log("Available files...");
-    fetch("/available-files")
+    fetch("/available-files", { signal: AbortSignal.timeout(7000) })
         .then(response => response.json())
         .then(handleAvailableFiles);
 }
@@ -16,7 +14,7 @@ function selectFile(name) {
     console.log("Select file");
     const body = new FormData();
     body.set("fileName", name);
-    fetch("/select-file", {method: "POST", body: body})
+    fetch("/select-file", { method: "POST", body: body, signal: AbortSignal.timeout(7000) })
         .then(response => response.json())
         .then(handleAvailableFiles);
 }
