@@ -37,4 +37,5 @@ function handleAvailableFiles(data) {
 
 (() => {
     loadAvailableFiles();
+    setInterval(loadAvailableFiles, 10000);
 })();
