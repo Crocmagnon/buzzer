@@ -1,8 +1,15 @@
-const GLOBAL_TIMEOUT = 7000;
+const GLOBAL_TIMEOUT = 10000;
+let connectionOk = true;
 
 function play() {
     console.log("Play...");
     fetch("/play", { signal: AbortSignal.timeout(GLOBAL_TIMEOUT) })
+        .catch(handleError);
+}
+
+function stop() {
+    console.log("Stop...");
+    fetch("/stop", { signal: AbortSignal.timeout(GLOBAL_TIMEOUT) })
         .catch(handleError);
 }
 
@@ -35,7 +42,11 @@ function selectFile(name) {
 
 function handleStatus(data) {
     document.body.classList.remove("w3-disabled");
-    console.log("data", data);
+    if (!connectionOk) {
+        connectionOk = true;
+        location.reload();
+    }
+
     let dom = "";
     data.files.forEach(element => {
         if (element === data.selectedFile) {
@@ -54,6 +65,7 @@ function handleStatus(data) {
 function handleError() {
     console.log("Lost connection :'(");
     document.body.classList.add("w3-disabled");
+    connectionOk = false;
 }
 
 (() => {

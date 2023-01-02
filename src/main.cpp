@@ -74,6 +74,12 @@ void play()
   audio.connecttoFS(SD, path.c_str());
 }
 
+void onStop(AsyncWebServerRequest *request)
+{
+  audio.stopSong();
+  request->send(200);
+}
+
 void onPlay(AsyncWebServerRequest *request)
 {
   play();
@@ -237,6 +243,7 @@ void setup()
 
   // Server
   server.on("/play", HTTP_GET, onPlay);
+  server.on("/stop", HTTP_GET, onStop);
   server.on("/status", HTTP_GET, onStatus);
   server.on("/select-file", HTTP_POST, onSelectFile);
   server.on("/change-volume", HTTP_POST, onChangeVolume);
