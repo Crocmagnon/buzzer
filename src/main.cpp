@@ -7,9 +7,16 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include "creds.h"
 
-// #define B_WIFI_AP
+// Toggle on to switch to AP mode.
+// Leave commented for wifi station mode.
+//#define B_WIFI_AP
+
+#ifdef B_WIFI_AP
+#include "creds_ap.h"
+#else
+#include "creds.h"
+#endif
 
 #define I2S_DOUT 32
 #define I2S_BCLK 25
@@ -29,6 +36,12 @@
 #define OLED_RESET -1
 #define SCREEN_ADDRESS 0x3C
 
+#define SCREEN_MSG_X 0
+#define SCREEN_MSG_Y 24
+
+#define VOLUME_MIN 0
+#define VOLUME_MAX 21
+
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 String selectedFile = "";
@@ -37,17 +50,22 @@ AsyncWebServer server(80);
 Audio audio;
 
 byte buttonLastState = HIGH;
-byte currentVolume = 15;
+byte currentVolume = 2;
 
 bool fileIsValid(String fileName) {
   return !fileName.startsWith(".") && (fileName.endsWith(".mp3") || fileName.endsWith(".aac") || fileName.endsWith(".wav"));
 }
 
+void clearMessageArea() {
+  display.drawRect(SCREEN_MSG_X, SCREEN_MSG_Y, SCREEN_WIDTH - SCREEN_MSG_X, SCREEN_HEIGHT - SCREEN_MSG_Y, BLACK);
+  display.display();
+  display.setCursor(SCREEN_MSG_X, SCREEN_MSG_Y);
+}
+
 void displayText(String text) {
-    display.clearDisplay();
-    display.setCursor(0, 0);
-    display.println(text);
-    display.display();
+  clearMessageArea();
+  display.println(text);
+  display.display();
 }
 
 void play()
@@ -113,13 +131,16 @@ void onChangeVolume(AsyncWebServerRequest *request)
     String s_modifier = request->getParam("modifier", true)->value();
     int modifier = s_modifier.toInt();
     currentVolume += modifier;
-    if (currentVolume > 21)
-      currentVolume = 21;
-    else if (currentVolume < 0)
-      currentVolume = 0;
+    if (currentVolume > VOLUME_MAX)
+      currentVolume = VOLUME_MAX;
+    else if (currentVolume < VOLUME_MIN)
+      currentVolume = VOLUME_MIN;
     audio.setVolume(currentVolume);
     Serial.print(currentVolume);
-    displayText("Volume : " + currentVolume);
+    clearMessageArea();
+    display.print("Volume : ");
+    display.println(currentVolume);
+    display.display();
   }
   Serial.println();
   onStatus(request);
@@ -140,7 +161,7 @@ void setup()
   }
   display.clearDisplay();
   display.setTextSize(1);
-  display.setTextColor(WHITE);
+  display.setTextColor(WHITE, BLACK);
   display.setCursor(0, 0);
   display.println("Chargement...");
   display.display();
@@ -185,12 +206,18 @@ void setup()
     file = root.openNextFile();
   }
 
+  display.clearDisplay();
+  display.setCursor(0, 0);
   // Wifi
 #ifdef B_WIFI_AP
   Serial.println("Setting up AP...");
   WiFi.softAP(ssid, password);
   String wifiIP = WiFi.softAPIP().toString();
   String wifiMode = "AP";
+  display.print("Wifi: ");
+  display.println(ssid);
+  display.print("Pass: ");
+  display.println(password);
 #else
   Serial.print("Connecting to wifi...");
   WiFi.begin(ssid, password);
@@ -205,7 +232,8 @@ void setup()
 #endif
   String wifiMessage = wifiMode + " IP: " + wifiIP;
   Serial.println(wifiMessage);
-  display.println(wifiMessage);
+  display.print("IP:   ");
+  display.println(wifiIP);
   display.display();
 
   // Server
@@ -219,11 +247,13 @@ void setup()
   server.begin();
 
   Serial.println("Server ready!");
-  displayText("Pret !");
+  clearMessageArea();
+  display.println("Pret !");
+  display.display();
 
   // Audio
   audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
-  audio.setVolume(currentVolume); // Max 21
+  audio.setVolume(currentVolume);
 
   // Setup is done, light up the LED
   digitalWrite(LED, HIGH);

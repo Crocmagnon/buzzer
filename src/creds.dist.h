@@ -1,3 +1,3 @@
-// Copy to creds.h and edit
+// Copy to creds.h or creds_ap.h and edit
 const char *ssid = "buzzer";
 const char *password = "123456789";
