@@ -11,21 +11,23 @@
 
 // #define B_WIFI_AP
 
-#define I2S_DOUT 25
-#define I2S_BCLK 27
-#define I2S_LRC 26
+#define I2S_DOUT 32
+#define I2S_BCLK 25
+#define I2S_LRC 27
+
+#define SPI_MISO 18
+#define SPI_MOSI 19
+#define SPI_SCK 23
+#define SD_CS 5
 
 #define LED 2
-#define BUTTON 18
+#define BUTTON 4
 
 #define SSD1306_NO_SPLASH
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
 #define SCREEN_ADDRESS 0x3C
-
-#define LOGO_HEIGHT 16
-#define LOGO_WIDTH 16
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
@@ -36,11 +38,15 @@ Audio audio;
 
 byte buttonLastState = HIGH;
 
+bool fileIsValid(String fileName) {
+  return !fileName.startsWith(".") && (fileName.endsWith(".mp3") || fileName.endsWith(".aac") || fileName.endsWith(".wav"));
+}
+
 void play()
 {
-  String path = "/music/" + selectedFile;
+  String path = "/" + selectedFile;
   Serial.println("Playing file: " + path);
-  audio.connecttoFS(SPIFFS, path.c_str());
+  audio.connecttoFS(SD, path.c_str());
 }
 
 void onPlay(AsyncWebServerRequest *request)
@@ -57,12 +63,12 @@ void onAvailableFiles(AsyncWebServerRequest *request)
   DynamicJsonDocument root(256);
   root["selectedFile"] = selectedFile;
   JsonArray files = root.createNestedArray("files");
-  File music = SPIFFS.open("/music");
+  File music = SD.open("/");
   File file = music.openNextFile();
   while (file)
   {
     String fileName = file.name();
-    if (!fileName.startsWith("."))
+    if (fileIsValid(fileName))
       files.add(fileName);
     file.close();
     file = music.openNextFile();
@@ -115,12 +121,24 @@ void setup()
     return;
   }
 
-  File root = SPIFFS.open("/music");
+  pinMode(SD_CS, OUTPUT);
+  digitalWrite(SD_CS, HIGH);
+  SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
+
+  if(!SD.begin(SD_CS))
+  {
+    Serial.println("Error talking to SD card!");
+    display.println("Impossible d'acceder a la carte SD...");
+    display.display();
+    return;
+  }
+
+  File root = SD.open("/");
   File file = root.openNextFile();
   while (file)
   {
     String fileName = file.name();
-    if (!fileName.startsWith("."))
+    if (fileIsValid(fileName))
     {
       selectedFile = fileName;
       Serial.println("Selected " + fileName);
