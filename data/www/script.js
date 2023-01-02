@@ -1,5 +1,6 @@
 const GLOBAL_TIMEOUT = 10000;
 let connectionOk = true;
+let statusTimeout = null;
 
 function play() {
     console.log("Play...");
@@ -41,6 +42,7 @@ function selectFile(name) {
 }
 
 function handleStatus(data) {
+    clearTimeout(statusTimeout);
     document.body.classList.remove("w3-disabled");
     if (!connectionOk) {
         connectionOk = true;
@@ -60,6 +62,7 @@ function handleStatus(data) {
     document.getElementById("volume-current").innerText = data.volume.current;
     document.getElementById("volume-increase").disabled = !data.volume.canIncrease;
     document.getElementById("volume-decrease").disabled = !data.volume.canDecrease;
+    statusTimeout = setTimeout(loadStatus, GLOBAL_TIMEOUT);
 }
 
 function handleError() {
@@ -70,5 +73,5 @@ function handleError() {
 
 (() => {
     loadStatus();
-    setInterval(loadStatus, GLOBAL_TIMEOUT);
+    statusTimeout = setTimeout(loadStatus, GLOBAL_TIMEOUT);
 })();
