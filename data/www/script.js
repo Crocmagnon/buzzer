@@ -2,7 +2,8 @@ const GLOBAL_TIMEOUT = 7000;
 
 function play() {
     console.log("Play...");
-    fetch("/play", { signal: AbortSignal.timeout(GLOBAL_TIMEOUT) });
+    fetch("/play", { signal: AbortSignal.timeout(GLOBAL_TIMEOUT) })
+        .catch(handleError);
 }
 
 function volume(modifier) {
@@ -10,14 +11,16 @@ function volume(modifier) {
     body.set("modifier", modifier);
     fetch(`/change-volume`, { method: "POST", body: body, signal: AbortSignal.timeout(GLOBAL_TIMEOUT) })
         .then(response => response.json())
-        .then(handleStatus);
+        .then(handleStatus)
+        .catch(handleError);
 }
 
 function loadStatus() {
     console.log("Status...");
     fetch("/status", { signal: AbortSignal.timeout(GLOBAL_TIMEOUT) })
         .then(response => response.json())
-        .then(handleStatus);
+        .then(handleStatus)
+        .catch(handleError);
 }
 
 function selectFile(name) {
@@ -26,10 +29,12 @@ function selectFile(name) {
     body.set("fileName", name);
     fetch("/select-file", { method: "POST", body: body, signal: AbortSignal.timeout(GLOBAL_TIMEOUT) })
         .then(response => response.json())
-        .then(handleStatus);
+        .then(handleStatus)
+        .catch(handleError);
 }
 
 function handleStatus(data) {
+    document.body.classList.remove("w3-disabled");
     console.log("data", data);
     let dom = "";
     data.files.forEach(element => {
@@ -46,7 +51,12 @@ function handleStatus(data) {
     document.getElementById("volume-decrease").disabled = !data.volume.canDecrease;
 }
 
+function handleError() {
+    console.log("Lost connection :'(");
+    document.body.classList.add("w3-disabled");
+}
+
 (() => {
     loadStatus();
-    setInterval(loadStatus, 10000);
+    setInterval(loadStatus, GLOBAL_TIMEOUT);
 })();
