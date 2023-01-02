@@ -85,6 +85,10 @@ void onSelectFile(AsyncWebServerRequest *request)
   {
     selectedFile = request->getParam("fileName", true)->value();
     Serial.print(selectedFile);
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.println("Selectionne : "+ selectedFile);
+    display.display();
   }
   Serial.println();
   onAvailableFiles(request);
@@ -183,7 +187,9 @@ void setup()
   server.begin();
 
   Serial.println("Server ready!");
-  display.println("Serveur pret !");
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.println("Pret !");
   display.display();
 
   // Audio
