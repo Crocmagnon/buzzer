@@ -3,6 +3,10 @@
 #include <SPIFFS.h>
 #include <AsyncJson.h>
 #include <Audio.h>
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 #include "creds.h"
 
 // #define B_WIFI_AP
@@ -13,6 +17,17 @@
 
 #define LED 2
 #define BUTTON 18
+
+#define SSD1306_NO_SPLASH
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
+#define SCREEN_ADDRESS 0x3C
+
+#define LOGO_HEIGHT   16
+#define LOGO_WIDTH    16
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 String selectedFile = "";
 
@@ -104,8 +119,8 @@ void setup()
 #ifdef B_WIFI_AP
   Serial.println("Setting up AP...");
   WiFi.softAP(ssid, password);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.softAPIP());
+  String wifiIP = WiFi.softAPIP().toString();
+  String wifiMode = "AP";
 #else
   Serial.print("Connecting to wifi...");
   WiFi.begin(ssid, password);
@@ -115,9 +130,11 @@ void setup()
     delay(500);
   }
   Serial.println();
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+  String wifiIP = WiFi.localIP().toString();
+  String wifiMode = "client";
 #endif
+  String wifiMessage = wifiMode + " IP: " + wifiIP;
+  Serial.println(wifiMessage);
 
   // Server
   server.on("/play", HTTP_GET, onPlay);
@@ -130,9 +147,25 @@ void setup()
 
   Serial.println("Server ready!");
 
+  // Audio
   audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
   audio.setVolume(21); // Max 21
 
+  // Screen
+
+  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    return;
+  }
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.println(wifiMessage);
+  display.display();
+
+  // Setup is done, light up the LED
   digitalWrite(LED, HIGH);
 }
 
