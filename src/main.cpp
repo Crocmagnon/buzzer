@@ -24,8 +24,8 @@
 #define OLED_RESET -1
 #define SCREEN_ADDRESS 0x3C
 
-#define LOGO_HEIGHT   16
-#define LOGO_WIDTH    16
+#define LOGO_HEIGHT 16
+#define LOGO_WIDTH 16
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
@@ -91,12 +91,27 @@ void setup()
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LOW);
 
+  // Screen
+  if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
+  {
+    Serial.println(F("SSD1306 allocation failed"));
+    return;
+  }
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.println("Chargement...");
+  display.display();
+
   pinMode(BUTTON, INPUT_PULLUP);
 
   // Setup SPIFFS
   if (!SPIFFS.begin())
   {
     Serial.println("SPIFFS error. Exiting.");
+    display.println("Impossible d'acceder aux fichiers...");
+    display.display();
     return;
   }
 
@@ -109,6 +124,8 @@ void setup()
     {
       selectedFile = fileName;
       Serial.println("Selected " + fileName);
+      display.println("Selectionne : " + fileName);
+      display.display();
       break;
     }
     file.close();
@@ -135,6 +152,8 @@ void setup()
 #endif
   String wifiMessage = wifiMode + " IP: " + wifiIP;
   Serial.println(wifiMessage);
+  display.println(wifiMessage);
+  display.display();
 
   // Server
   server.on("/play", HTTP_GET, onPlay);
@@ -146,24 +165,12 @@ void setup()
   server.begin();
 
   Serial.println("Server ready!");
+  display.println("Serveur pret !");
+  display.display();
 
   // Audio
   audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
   audio.setVolume(21); // Max 21
-
-  // Screen
-
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-    Serial.println(F("SSD1306 allocation failed"));
-    return;
-  }
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 0);
-  display.println(wifiMessage);
-  display.display();
 
   // Setup is done, light up the LED
   digitalWrite(LED, HIGH);
