@@ -170,7 +170,7 @@ void setup()
 
   // Audio
   audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
-  audio.setVolume(21); // Max 21
+  audio.setVolume(15); // Max 21
 
   // Setup is done, light up the LED
   digitalWrite(LED, HIGH);
@@ -182,4 +182,5 @@ void loop()
   if (buttonCurrentState == LOW && buttonLastState == HIGH)
     play();
   buttonLastState = buttonCurrentState;
+  audio.loop();
 }
