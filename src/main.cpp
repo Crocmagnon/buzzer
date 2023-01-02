@@ -57,8 +57,7 @@ bool fileIsValid(String fileName) {
 }
 
 void clearMessageArea() {
-  display.drawRect(SCREEN_MSG_X, SCREEN_MSG_Y, SCREEN_WIDTH - SCREEN_MSG_X, SCREEN_HEIGHT - SCREEN_MSG_Y, BLACK);
-  display.display();
+  display.fillRect(SCREEN_MSG_X, SCREEN_MSG_Y, SCREEN_WIDTH - SCREEN_MSG_X, SCREEN_HEIGHT - SCREEN_MSG_Y, BLACK);
   display.setCursor(SCREEN_MSG_X, SCREEN_MSG_Y);
 }
 
