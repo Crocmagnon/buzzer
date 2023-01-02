@@ -37,9 +37,17 @@ AsyncWebServer server(80);
 Audio audio;
 
 byte buttonLastState = HIGH;
+byte currentVolume = 15;
 
 bool fileIsValid(String fileName) {
   return !fileName.startsWith(".") && (fileName.endsWith(".mp3") || fileName.endsWith(".aac") || fileName.endsWith(".wav"));
+}
+
+void displayText(String text) {
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.println(text);
+    display.display();
 }
 
 void play()
@@ -55,9 +63,9 @@ void onPlay(AsyncWebServerRequest *request)
   request->send(200);
 }
 
-void onAvailableFiles(AsyncWebServerRequest *request)
+void onStatus(AsyncWebServerRequest *request)
 {
-  Serial.println("Available files");
+  Serial.println("Status");
   AsyncResponseStream *response = request->beginResponseStream("application/json");
 
   DynamicJsonDocument root(256);
@@ -73,6 +81,12 @@ void onAvailableFiles(AsyncWebServerRequest *request)
     file.close();
     file = music.openNextFile();
   }
+
+  JsonObject volume = root.createNestedObject("volume");
+  volume["current"] = currentVolume;
+  volume["canDecrease"] = currentVolume > 0;
+  volume["canIncrease"] = currentVolume < 21;
+
   serializeJson(root, *response);
 
   request->send(response);
@@ -85,13 +99,30 @@ void onSelectFile(AsyncWebServerRequest *request)
   {
     selectedFile = request->getParam("fileName", true)->value();
     Serial.print(selectedFile);
-    display.clearDisplay();
-    display.setCursor(0, 0);
-    display.println("Selectionne : "+ selectedFile);
-    display.display();
+    displayText("Selectionne : " + selectedFile);
   }
   Serial.println();
-  onAvailableFiles(request);
+  onStatus(request);
+}
+
+void onChangeVolume(AsyncWebServerRequest *request)
+{
+  Serial.print("Volume: ");
+  if (request->hasParam("modifier", true))
+  {
+    String s_modifier = request->getParam("modifier", true)->value();
+    int modifier = s_modifier.toInt();
+    currentVolume += modifier;
+    if (currentVolume > 21)
+      currentVolume = 21;
+    else if (currentVolume < 0)
+      currentVolume = 0;
+    audio.setVolume(currentVolume);
+    Serial.print(currentVolume);
+    displayText("Volume : " + currentVolume);
+  }
+  Serial.println();
+  onStatus(request);
 }
 
 void setup()
@@ -179,22 +210,20 @@ void setup()
 
   // Server
   server.on("/play", HTTP_GET, onPlay);
-  server.on("/available-files", HTTP_GET, onAvailableFiles);
+  server.on("/status", HTTP_GET, onStatus);
   server.on("/select-file", HTTP_POST, onSelectFile);
+  server.on("/change-volume", HTTP_POST, onChangeVolume);
   server.onNotFound([](AsyncWebServerRequest *request)
                     { request->send(404); });
   server.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
   server.begin();
 
   Serial.println("Server ready!");
-  display.clearDisplay();
-  display.setCursor(0, 0);
-  display.println("Pret !");
-  display.display();
+  displayText("Pret !");
 
   // Audio
   audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
-  audio.setVolume(15); // Max 21
+  audio.setVolume(currentVolume); // Max 21
 
   // Setup is done, light up the LED
   digitalWrite(LED, HIGH);

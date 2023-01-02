@@ -14,13 +14,17 @@
     </div>
 
     <div class="w3-margin w3-center w3-card w3-padding-24">
-        <h3 class="w3-padding">Contrôles</h3>
         <button onclick="play()" class="w3-button w3-blue w3-xlarge w3-ripple">Jouer le son</button>
     </div>
 
     <div class="w3-margin w3-center w3-card w3-padding-24">
-        <h3 class="w3-padding">Fichiers disponibles</h3>
         <div id="available-files"></div>
+    </div>
+
+    <div class="w3-margin w3-center w3-card w3-padding-24">
+        <button id="volume-decrease" onclick="volume(-1)" class="w3-button w3-blue w3-xlarge w3-ripple">Vol-</button>
+        <span id="volume-current"></span>
+        <button id="volume-increase" onclick="volume(1)" class="w3-button w3-blue w3-xlarge w3-ripple">Vol+</button>
     </div>
 </body>
 

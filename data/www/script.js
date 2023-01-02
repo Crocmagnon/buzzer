@@ -1,25 +1,35 @@
+const GLOBAL_TIMEOUT = 7000;
+
 function play() {
     console.log("Play...");
-    fetch("/play", { signal: AbortSignal.timeout(7000) });
+    fetch("/play", { signal: AbortSignal.timeout(GLOBAL_TIMEOUT) });
 }
 
-function loadAvailableFiles() {
-    console.log("Available files...");
-    fetch("/available-files", { signal: AbortSignal.timeout(7000) })
+function volume(modifier) {
+    const body = new FormData();
+    body.set("modifier", modifier);
+    fetch(`/change-volume`, { method: "POST", body: body, signal: AbortSignal.timeout(GLOBAL_TIMEOUT) })
         .then(response => response.json())
-        .then(handleAvailableFiles);
+        .then(handleStatus);
+}
+
+function loadStatus() {
+    console.log("Status...");
+    fetch("/status", { signal: AbortSignal.timeout(GLOBAL_TIMEOUT) })
+        .then(response => response.json())
+        .then(handleStatus);
 }
 
 function selectFile(name) {
     console.log("Select file");
     const body = new FormData();
     body.set("fileName", name);
-    fetch("/select-file", { method: "POST", body: body, signal: AbortSignal.timeout(7000) })
+    fetch("/select-file", { method: "POST", body: body, signal: AbortSignal.timeout(GLOBAL_TIMEOUT) })
         .then(response => response.json())
-        .then(handleAvailableFiles);
+        .then(handleStatus);
 }
 
-function handleAvailableFiles(data) {
+function handleStatus(data) {
     console.log("data", data);
     let dom = "";
     data.files.forEach(element => {
@@ -31,9 +41,12 @@ function handleAvailableFiles(data) {
         }
     });
     document.getElementById("available-files").innerHTML = dom;
+    document.getElementById("volume-current").innerText = data.volume.current;
+    document.getElementById("volume-increase").disabled = !data.volume.canIncrease;
+    document.getElementById("volume-decrease").disabled = !data.volume.canDecrease;
 }
 
 (() => {
-    loadAvailableFiles();
-    setInterval(loadAvailableFiles, 10000);
+    loadStatus();
+    setInterval(loadStatus, 10000);
 })();
