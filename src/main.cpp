@@ -12,17 +12,25 @@
 #define I2S_LRC 26
 
 #define LED 2
+#define BUTTON 18
 
 String selectedFile = "";
 
 AsyncWebServer server(80);
 Audio audio;
 
-void onPlay(AsyncWebServerRequest *request)
+byte buttonLastState = HIGH;
+
+void play()
 {
   String path = "/music/" + selectedFile;
   Serial.println("Playing file: " + path);
   audio.connecttoFS(SPIFFS, path.c_str());
+}
+
+void onPlay(AsyncWebServerRequest *request)
+{
+  play();
   request->send(200);
 }
 
@@ -67,6 +75,8 @@ void setup()
   Serial.begin(115200);
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LOW);
+
+  pinMode(BUTTON, INPUT_PULLUP);
 
   // Setup SPIFFS
   if (!SPIFFS.begin())
@@ -128,4 +138,8 @@ void setup()
 
 void loop()
 {
+  byte buttonCurrentState = digitalRead(BUTTON);
+  if (buttonCurrentState == LOW && buttonLastState == HIGH)
+    play();
+  buttonLastState = buttonCurrentState;
 }
