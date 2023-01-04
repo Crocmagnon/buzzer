@@ -11,7 +11,7 @@
 
 // Toggle on to switch to AP mode.
 // Leave commented for wifi station mode.
-//#define B_WIFI_AP
+// #define B_WIFI_AP
 
 #ifdef B_WIFI_AP
 #include "creds_ap.h"
@@ -56,16 +56,19 @@ Preferences preferences;
 byte buttonLastState = HIGH;
 byte currentVolume = 12;
 
-bool fileIsValid(String fileName) {
+bool fileIsValid(String fileName)
+{
   return !fileName.startsWith(".") && (fileName.endsWith(".mp3") || fileName.endsWith(".aac") || fileName.endsWith(".wav"));
 }
 
-void clearMessageArea() {
+void clearMessageArea()
+{
   display.fillRect(SCREEN_MSG_X, SCREEN_MSG_Y, SCREEN_WIDTH - SCREEN_MSG_X, SCREEN_HEIGHT - SCREEN_MSG_Y, BLACK);
   display.setCursor(SCREEN_MSG_X, SCREEN_MSG_Y);
 }
 
-void displayText(String text) {
+void displayText(String text)
+{
   clearMessageArea();
   display.println(text);
   display.display();
@@ -168,8 +171,8 @@ void setup()
   // Screen
   if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
   {
-    Serial.println(F("SSD1306 allocation failed"));
-    return;
+    Serial.println("Display init failed");
+    while (true);
   }
   display.clearDisplay();
   display.setTextSize(1);
@@ -187,19 +190,19 @@ void setup()
     Serial.println("SPIFFS error. Exiting.");
     display.println("Impossible d'acceder aux fichiers...");
     display.display();
-    return;
+    while (true);
   }
 
   pinMode(SD_CS, OUTPUT);
   digitalWrite(SD_CS, HIGH);
   SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
 
-  if(!SD.begin(SD_CS))
+  if (!SD.begin(SD_CS))
   {
     Serial.println("Error talking to SD card!");
     display.println("Impossible d'acceder a la carte SD...");
     display.display();
-    return;
+    while (true);
   }
 
   selectedFile = preferences.getString("selectedFile", "");
