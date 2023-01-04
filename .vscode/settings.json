@@ -10,6 +10,9 @@
         "initializer_list": "cpp",
         "regex": "cpp",
         "*.tcc": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "atomic": "cpp",
+        "fstream": "cpp",
+        "sstream": "cpp"
     }
 }
