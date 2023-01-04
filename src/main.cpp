@@ -8,6 +8,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Preferences.h>
+#include <AsyncElegantOTA.h>
 
 // Toggle on to switch to AP mode.
 // Leave commented for wifi station mode.
@@ -341,6 +342,7 @@ void setup()
   server.on("/upload", HTTP_POST, onUpload, onUploadFile);
   server.onNotFound(onNotFound);
   server.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
+  AsyncElegantOTA.begin(&server);
   server.begin();
 
   Serial.println("Server ready!");
