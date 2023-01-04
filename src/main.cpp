@@ -174,6 +174,7 @@ void setup()
   display.display();
 
   pinMode(BUTTON, INPUT_PULLUP);
+  buttonLastState = digitalRead(BUTTON);
 
   // Setup SPIFFS
   if (!SPIFFS.begin())
