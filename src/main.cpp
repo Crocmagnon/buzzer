@@ -7,6 +7,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <Preferences.h>
 
 // Toggle on to switch to AP mode.
 // Leave commented for wifi station mode.
@@ -50,6 +51,7 @@ String selectedFile = "";
 
 AsyncWebServer server(80);
 Audio audio;
+Preferences preferences;
 
 byte buttonLastState = HIGH;
 byte currentVolume = 12;
@@ -123,6 +125,7 @@ void onSelectFile(AsyncWebServerRequest *request)
   if (request->hasParam("fileName", true))
   {
     selectedFile = request->getParam("fileName", true)->value();
+    preferences.putString("selectedFile", selectedFile);
     Serial.print(selectedFile);
     displayText("Selectionne : " + selectedFile);
   }
@@ -159,6 +162,8 @@ void setup()
   Serial.begin(115200);
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LOW);
+
+  preferences.begin("buzzer", false);
 
   // Screen
   if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
@@ -197,21 +202,26 @@ void setup()
     return;
   }
 
-  File root = SD.open("/");
-  File file = root.openNextFile();
-  while (file)
+  selectedFile = preferences.getString("selectedFile", "");
+  if (selectedFile == "" || !fileIsValid(selectedFile))
   {
-    String fileName = file.name();
-    if (fileIsValid(fileName))
+    File root = SD.open("/");
+    File file = root.openNextFile();
+    while (file)
     {
-      selectedFile = fileName;
-      Serial.println("Selected " + fileName);
-      display.println("Selectionne : " + fileName);
-      display.display();
-      break;
+      String fileName = file.name();
+      if (fileIsValid(fileName))
+      {
+        selectedFile = fileName;
+        Serial.println("Selected " + fileName);
+        display.println("Selectionne : " + fileName);
+        display.display();
+        break;
+      }
+      file.close();
+      file = root.openNextFile();
     }
-    file.close();
-    file = root.openNextFile();
+    root.close();
   }
 
   display.clearDisplay();
