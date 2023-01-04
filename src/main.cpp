@@ -18,10 +18,12 @@
 #include "creds.h"
 #endif
 
+// DAC
 #define I2S_DOUT 32
 #define I2S_BCLK 25
 #define I2S_LRC 27
 
+// SD CARD
 #define SPI_MISO 18
 #define SPI_MOSI 19
 #define SPI_SCK 23
