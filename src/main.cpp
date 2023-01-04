@@ -183,7 +183,6 @@ void onUpload(AsyncWebServerRequest *request)
 
 void onUploadFile(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
 {
-  Serial.println("onUploadFile");
   if (!index)
   {
     Serial.printf("UploadStart: %s\n", filename.c_str());
@@ -198,7 +197,6 @@ void onUploadFile(AsyncWebServerRequest *request, String filename, size_t index,
   }
   if (len)
   {
-    Serial.printf("Write to: %s\n", filename.c_str());
     request->_tempFile.write(data, len);
   }
 
