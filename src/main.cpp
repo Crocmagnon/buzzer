@@ -163,6 +163,7 @@ void onChangeVolume(AsyncWebServerRequest *request)
       currentVolume = VOLUME_MAX;
     else if (currentVolume < VOLUME_MIN)
       currentVolume = VOLUME_MIN;
+    preferences.putUChar("currentVolume", currentVolume);
     audio.setVolume(currentVolume);
     Serial.print(currentVolume);
     clearMessageArea();
@@ -331,6 +332,7 @@ void setup()
 
   // Audio
   audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
+  currentVolume = preferences.getUChar("currentVolume", 12);
   audio.setVolume(currentVolume);
 
   // Setup is done, light up the LED
