@@ -30,7 +30,7 @@
 #define SD_CS 5
 
 #define LED 2
-#define BUTTON 4
+#define BUTTON 33
 
 #define SSD1306_NO_SPLASH
 #define SCREEN_WIDTH 128
