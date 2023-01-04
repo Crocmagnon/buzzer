@@ -98,8 +98,14 @@ void onStatus(AsyncWebServerRequest *request)
   Serial.println("Status");
   AsyncResponseStream *response = request->beginResponseStream("application/json");
 
-  DynamicJsonDocument root(256);
+  DynamicJsonDocument root(1024);
   root["selectedFile"] = selectedFile;
+
+  JsonObject volume = root.createNestedObject("volume");
+  volume["current"] = currentVolume;
+  volume["canDecrease"] = currentVolume > 0;
+  volume["canIncrease"] = currentVolume < 21;
+
   JsonArray files = root.createNestedArray("files");
   File music = SD.open("/");
   File file = music.openNextFile();
@@ -111,11 +117,7 @@ void onStatus(AsyncWebServerRequest *request)
     file.close();
     file = music.openNextFile();
   }
-
-  JsonObject volume = root.createNestedObject("volume");
-  volume["current"] = currentVolume;
-  volume["canDecrease"] = currentVolume > 0;
-  volume["canIncrease"] = currentVolume < 21;
+  root.shrinkToFit();
 
   serializeJson(root, *response);
 
@@ -157,6 +159,47 @@ void onChangeVolume(AsyncWebServerRequest *request)
   }
   Serial.println();
   onStatus(request);
+}
+
+void onUpload(AsyncWebServerRequest *request)
+{
+  Serial.println("onUpload");
+  request->send(200);
+}
+
+void onUploadFile(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
+{
+  Serial.println("onUploadFile");
+  if (!index)
+  {
+    Serial.printf("UploadStart: %s\n", filename.c_str());
+    String filePath = "/" + filename;
+    request->_tempFile = SD.open(filePath, FILE_WRITE);
+  }
+  if (!request->_tempFile)
+  {
+    Serial.println("Couldn't open file.");
+    request->redirect("/");
+    return;
+  }
+  if (len)
+  {
+    Serial.printf("Write to: %s\n", filename.c_str());
+    request->_tempFile.write(data, len);
+  }
+
+  if (final)
+  {
+    Serial.printf("UploadEnd: %s, %u B\n", filename.c_str(), index + len);
+    request->_tempFile.close();
+    request->redirect("/");
+  }
+}
+
+void onNotFound(AsyncWebServerRequest *request)
+{
+  Serial.println("not found");
+  request->send(400);
 }
 
 void setup()
@@ -263,8 +306,8 @@ void setup()
   server.on("/status", HTTP_GET, onStatus);
   server.on("/select-file", HTTP_POST, onSelectFile);
   server.on("/change-volume", HTTP_POST, onChangeVolume);
-  server.onNotFound([](AsyncWebServerRequest *request)
-                    { request->send(404); });
+  server.on("/upload", HTTP_POST, onUpload, onUploadFile);
+  server.onNotFound(onNotFound);
   server.serveStatic("/", SPIFFS, "/www/").setDefaultFile("index.html");
   server.begin();
 
