@@ -52,7 +52,7 @@ AsyncWebServer server(80);
 Audio audio;
 
 byte buttonLastState = HIGH;
-byte currentVolume = 2;
+byte currentVolume = 12;
 
 bool fileIsValid(String fileName) {
   return !fileName.startsWith(".") && (fileName.endsWith(".mp3") || fileName.endsWith(".aac") || fileName.endsWith(".wav"));
