@@ -83,6 +83,7 @@ void play()
 
 void onStop(AsyncWebServerRequest *request)
 {
+  Serial.println("Stop playing");
   audio.stopSong();
   request->send(200);
 }
@@ -98,39 +99,56 @@ void onStatus(AsyncWebServerRequest *request)
   Serial.println("Status");
   AsyncResponseStream *response = request->beginResponseStream("application/json");
 
-  DynamicJsonDocument root(4096);
-  JsonObject files = root.createNestedObject("files");
-  files["selectedIndex"] = -1;
-  files["moreNotShown"] = false;
+  StaticJsonDocument<96> root;
+  root["files"]["selected"] = selectedFile.c_str();
 
   JsonObject volume = root.createNestedObject("volume");
   volume["current"] = currentVolume;
   volume["canDecrease"] = currentVolume > 0;
   volume["canIncrease"] = currentVolume < 21;
 
-  JsonArray availableFiles = files.createNestedArray("available");
+  serializeJson(root, *response);
+  request->send(response);
+}
+
+void onListFiles(AsyncWebServerRequest *request)
+{
+  Serial.print("List files cursor=");
+  int cursor = 0;
+  if (request->hasParam("cursor")) {
+    String s_cursor = request->getParam("cursor")->value();
+    cursor = s_cursor.toInt();
+  }
+  Serial.println(cursor);
+
+  AsyncResponseStream *response = request->beginResponseStream("application/json");
+
+  StaticJsonDocument<512> root;
+  root["next"] = -1;
+  JsonArray files = root.createNestedArray("files");
   File music = SD.open("/");
   File file = music.openNextFile();
-  unsigned int index = 0;
+  int index = 0;
   while (file)
   {
     String fileName = file.name();
     if (fileIsValid(fileName))
     {
-      availableFiles.add(fileName);
-      if (fileName == selectedFile) {
-        files["selectedIndex"] = index;
-      }
       index++;
+      if (index >= cursor)
+        files.add(fileName);
     }
     file.close();
 
     if (root.overflowed())
     {
-      files["moreNotShown"] = true;
+      root["next"] = index;
       break;
     }
     file = music.openNextFile();
+  }
+  if (root["next"] == -1) {
+    root.remove("next");
   }
 
   serializeJson(root, *response);
@@ -316,6 +334,7 @@ void setup()
   server.on("/play", HTTP_GET, onPlay);
   server.on("/stop", HTTP_GET, onStop);
   server.on("/status", HTTP_GET, onStatus);
+  server.on("/list-files", HTTP_GET, onListFiles);
   server.on("/select-file", HTTP_POST, onSelectFile);
   server.on("/change-volume", HTTP_POST, onChangeVolume);
   server.on("/upload", HTTP_POST, onUpload, onUploadFile);
