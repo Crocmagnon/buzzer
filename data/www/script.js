@@ -68,7 +68,8 @@ function handleStatus(data) {
     statusTimeout = setTimeout(loadStatus, GLOBAL_TIMEOUT);
 }
 
-function handleError() {
+function handleError(error) {
+    console.error(error);
     clearTimeout(statusTimeout);
     console.log("Lost connection :'(");
     document.body.classList.add("w3-disabled");
