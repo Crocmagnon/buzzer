@@ -78,6 +78,7 @@ void play()
 {
   String path = "/" + selectedFile;
   Serial.println("Playing file: " + path);
+  audio.stopSong();
   audio.connecttoFS(SD, path.c_str());
 }
 
