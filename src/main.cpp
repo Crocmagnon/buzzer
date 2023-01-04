@@ -98,29 +98,42 @@ void onStatus(AsyncWebServerRequest *request)
   Serial.println("Status");
   AsyncResponseStream *response = request->beginResponseStream("application/json");
 
-  DynamicJsonDocument root(1024);
-  root["selectedFile"] = selectedFile;
+  DynamicJsonDocument root(4096);
+  JsonObject files = root.createNestedObject("files");
+  files["selectedIndex"] = -1;
+  files["moreNotShown"] = false;
 
   JsonObject volume = root.createNestedObject("volume");
   volume["current"] = currentVolume;
   volume["canDecrease"] = currentVolume > 0;
   volume["canIncrease"] = currentVolume < 21;
 
-  JsonArray files = root.createNestedArray("files");
+  JsonArray availableFiles = files.createNestedArray("available");
   File music = SD.open("/");
   File file = music.openNextFile();
+  unsigned int index = 0;
   while (file)
   {
     String fileName = file.name();
     if (fileIsValid(fileName))
-      files.add(fileName);
+    {
+      availableFiles.add(fileName);
+      if (fileName == selectedFile) {
+        files["selectedIndex"] = index;
+      }
+      index++;
+    }
     file.close();
+
+    if (root.overflowed())
+    {
+      files["moreNotShown"] = true;
+      break;
+    }
     file = music.openNextFile();
   }
-  root.shrinkToFit();
 
   serializeJson(root, *response);
-
   request->send(response);
 }
 

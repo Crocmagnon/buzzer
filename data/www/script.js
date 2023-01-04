@@ -50,15 +50,18 @@ function handleStatus(data) {
     }
 
     let dom = "";
-    data.files.forEach(element => {
-        if (element === data.selectedFile) {
-            dom += `<button class="w3-button w3-green" onclick="selectFile('${element}')">${element}</button>`;
+    data.files.available.forEach((element, index) => {
+        let className = "w3-blue";
+        if (index === data.files.selectedIndex) {
+            className = "w3-green";
         }
-        else {
-            dom += `<button class="w3-button w3-blue" onclick="selectFile('${element}')">${element}</button>`;
-        }
+        dom += `<button class="w3-button ${className}" onclick="selectFile('${element}')">${element}</button>`;
     });
+    if (data.files.moreNotShown) {
+        dom += `<button class="w3-button w3-gray" disabled="" title="D'autres fichiers sont disponibles">...</button>`;
+    }
     document.getElementById("available-files").innerHTML = dom;
+
     document.getElementById("volume-current").innerText = data.volume.current;
     document.getElementById("volume-increase").disabled = !data.volume.canIncrease;
     document.getElementById("volume-decrease").disabled = !data.volume.canDecrease;
