@@ -28,7 +28,8 @@ void onStatus(AsyncWebServerRequest *request)
   AsyncResponseStream *response = request->beginResponseStream("application/json");
 
   StaticJsonDocument<96> root;
-  root["files"]["selected"] = preferences.getString(SELECTED_FILE, "").c_str();
+  String file = preferences.getString(SELECTED_FILE, "");
+  root["files"]["selected"] = file.c_str();
 
   JsonObject volume = root.createNestedObject("volume");
   byte currentVolume = preferences.getUChar(CURRENT_VOLUME);
