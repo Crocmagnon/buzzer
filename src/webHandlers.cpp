@@ -87,15 +87,12 @@ void onListFiles(AsyncWebServerRequest *request)
 
 void onSelectFile(AsyncWebServerRequest *request)
 {
-  Serial.print("Select file: ");
+  Serial.println("Select file");
   if (request->hasParam("fileName", true))
   {
     String selectedFile = request->getParam("fileName", true)->value();
-    preferences.putString(SELECTED_FILE, selectedFile);
-    Serial.print(selectedFile);
-    displaySelectedFile();
+    selectFile(selectedFile);
   }
-  Serial.println();
   onStatus(request);
 }
 
@@ -152,6 +149,7 @@ void onUploadFile(AsyncWebServerRequest *request, String filename, size_t index,
     Serial.printf("Upload end: %s, %u B\n", filename.c_str(), index + len);
     request->_tempFile.close();
     request->redirect("/");
+    selectFile(filename);
   }
 }
 

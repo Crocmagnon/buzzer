@@ -75,13 +75,25 @@ void displayWifiCreds()
   display.display();
 }
 
-void displaySelectedFile()
+void displayStatus()
 {
+  clearMessageArea();
+
+  String volume = String(preferences.getUChar(CURRENT_VOLUME));
+  display.println("Volume: " + volume);
+
   String prefix = "Son: ";
-  displayText(prefix + preferences.getString(SELECTED_FILE, "").substring(0, LINE_LENGTH - prefix.length()));
+  display.println(prefix + preferences.getString(SELECTED_FILE, "").substring(0, LINE_LENGTH - prefix.length()));
+
+  display.println("\nRetourne moi !");
+
+  display.display();
 }
 
-void displayVolume() {
-    String volume = String(preferences.getUChar(CURRENT_VOLUME));
-    displayText("Volume: " + volume);
+void selectFile(String fileName)
+{
+    preferences.putString(SELECTED_FILE, fileName);
+    displayStatus();
+    Serial.print("Select new file: ");
+    Serial.println(fileName);
 }

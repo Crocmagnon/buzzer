@@ -34,7 +34,7 @@ void setup()
   diagnosticPrintln("Configuration OK!");
 
   displayWifiCreds();
-  displaySelectedFile();
+  displayStatus();
 
   // Setup is done, light up the LED
   Serial.println("All setup & ready to go!");

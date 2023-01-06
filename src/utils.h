@@ -11,8 +11,10 @@ void clearMessageArea();
 void displayText(String text);
 void play();
 
+void selectFile(String fileName);
+
 void displayWifiCreds();
-void displaySelectedFile();
+void displayStatus();
 
 void diagnosticPrint(String text);
 void diagnosticPrintln(String text);
