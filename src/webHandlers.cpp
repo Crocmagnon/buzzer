@@ -132,7 +132,7 @@ void onUploadFile(AsyncWebServerRequest *request, String filename, size_t index,
 {
   if (!index)
   {
-    Serial.printf("UploadStart: %s\n", filename.c_str());
+    Serial.printf("Upload start: %s\n", filename.c_str());
     String filePath = "/" + filename;
     request->_tempFile = SD.open(filePath, FILE_WRITE);
   }
@@ -149,7 +149,7 @@ void onUploadFile(AsyncWebServerRequest *request, String filename, size_t index,
 
   if (final)
   {
-    Serial.printf("UploadEnd: %s, %u B\n", filename.c_str(), index + len);
+    Serial.printf("Upload end: %s, %u B\n", filename.c_str(), index + len);
     request->_tempFile.close();
     request->redirect("/");
   }
