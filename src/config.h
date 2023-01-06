@@ -20,6 +20,8 @@
 #define LED 2
 #define BUTTON 33
 
+#define DEBOUNCE_DELAY 1000
+
 // Screen
 #define SSD1306_NO_SPLASH
 #define SCREEN_WIDTH 128
