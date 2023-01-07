@@ -13,6 +13,7 @@ long lastDebounceTime = 0;
 
 void setup()
 {
+  setCpuFrequencyMhz(240);
   // Setup GPIO
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LOW);
@@ -39,6 +40,7 @@ void setup()
 
   // Setup is done, light up the LED
   Serial.println("All setup & ready to go!");
+  setCpuFrequencyMhz(80);
   digitalWrite(LED, HIGH);
 }
 
@@ -52,4 +54,16 @@ void loop()
     buttonLastState = buttonCurrentState;
   }
   audio.loop();
+}
+
+void audio_info(const char *info){
+  String s_info = info;
+  s_info.toLowerCase();
+  s_info.trim();
+  if (s_info == "closing audio file") {
+    setCpuFrequencyMhz(80);
+  }
+  else if (s_info == "stream ready") {
+    setCpuFrequencyMhz(240);
+  }
 }
