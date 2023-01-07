@@ -112,8 +112,7 @@ void onChangeVolume(AsyncWebServerRequest *request)
     preferences.putUChar(CURRENT_VOLUME, currentVolume);
     audio.setVolume(currentVolume);
     Serial.print(currentVolume);
-    String s_volume = String(currentVolume);
-    displayText("Volume : " + s_volume);
+    displayStatus();
   }
   Serial.println();
   onStatus(request);
