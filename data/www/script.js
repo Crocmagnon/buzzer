@@ -1,4 +1,4 @@
-const GLOBAL_TIMEOUT = 10000;
+const GLOBAL_TIMEOUT = 3500;
 let connectionOk = true;
 let statusTimeout = null;
 let selectedFile = "";
@@ -66,6 +66,16 @@ function handleStatus(data) {
     document.getElementById("volume-current").innerText = data.volume.current;
     document.getElementById("volume-increase").disabled = !data.volume.canIncrease;
     document.getElementById("volume-decrease").disabled = !data.volume.canDecrease;
+
+    document.getElementById("remainingTimeBeforeSleep").innerText = secondsToHumanDuration(data.remainingSecondsBeforeSleep);
+
+    const playingStatus = document.getElementById("playingStatus");
+    if (data.playing) {
+        playingStatus.classList.remove("w3-hide");
+    } else {
+        playingStatus.classList.add("w3-hide");
+    }
+
     statusTimeout = setTimeout(loadStatus, GLOBAL_TIMEOUT);
 }
 
@@ -110,6 +120,11 @@ function handleError(error) {
     document.body.classList.add("w3-disabled");
     connectionOk = false;
     statusTimeout = setTimeout(loadStatus, GLOBAL_TIMEOUT);
+}
+
+function secondsToHumanDuration(seconds) {
+    console.log({seconds});
+    return new Date(seconds * 1000).toISOString().slice(11, 19);
 }
 
 (() => {

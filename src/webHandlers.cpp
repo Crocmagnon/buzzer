@@ -28,7 +28,7 @@ void onStatus(AsyncWebServerRequest *request)
   Serial.println("Status");
   AsyncResponseStream *response = request->beginResponseStream("application/json");
 
-  StaticJsonDocument<96> root;
+  StaticJsonDocument<128> root;
   String file = preferences.getString(SELECTED_FILE, "");
   root["files"]["selected"] = file.c_str();
 
@@ -37,6 +37,15 @@ void onStatus(AsyncWebServerRequest *request)
   volume["current"] = currentVolume;
   volume["canDecrease"] = currentVolume > 0;
   volume["canIncrease"] = currentVolume < 21;
+
+  if (!audio.isRunning())
+  {
+    root["remainingSecondsBeforeSleep"] = (DEEP_SLEEP_DELAY_MS - (millis() - lastActionTime)) / 1000;
+  }
+  else {
+    root["remainingSecondsBeforeSleep"] = DEEP_SLEEP_DELAY_MS / 1000;
+  }
+  root["playing"] = audio.isRunning();
 
   serializeJson(root, *response);
   request->send(response);
