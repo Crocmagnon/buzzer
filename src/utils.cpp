@@ -5,6 +5,7 @@
 #include <SD.h>
 
 #include "config.h"
+#include "utils.h"
 
 bool fileIsValid(String fileName)
 {
@@ -31,13 +32,13 @@ void displayText(String text)
 
 void play()
 {
+  updateLastAction();
   String selectedFile = preferences.getString(SELECTED_FILE);
   String path = "/" + selectedFile;
   Serial.println("Playing file: " + path);
   audio.stopSong();
   audio.connecttoFS(SD, path.c_str());
 }
-
 
 void diagnosticPrint(String text)
 {
@@ -92,8 +93,26 @@ void displayStatus()
 
 void selectFile(String fileName)
 {
-    preferences.putString(SELECTED_FILE, fileName);
-    displayStatus();
-    Serial.print("Select new file: ");
-    Serial.println(fileName);
+  preferences.putString(SELECTED_FILE, fileName);
+  displayStatus();
+  Serial.print("Select new file: ");
+  Serial.println(fileName);
+}
+
+void deepSleep()
+{
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.println("Veille. Retourne-moi pour me reveiller.");
+  display.display();
+
+  Serial.println("Deep sleep!");
+  esp_sleep_enable_ext0_wakeup(DEEP_SLEEP_WAKEUP, HIGH);
+  digitalWrite(LED, LOW);
+  esp_deep_sleep_start();
+}
+
+void updateLastAction()
+{
+  lastActionTime = millis();
 }

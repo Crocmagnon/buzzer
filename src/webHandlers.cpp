@@ -11,6 +11,7 @@
 
 void onStop(AsyncWebServerRequest *request)
 {
+  updateLastAction();
   Serial.println("Stop playing");
   audio.stopSong();
   request->send(200);
@@ -43,6 +44,7 @@ void onStatus(AsyncWebServerRequest *request)
 
 void onListFiles(AsyncWebServerRequest *request)
 {
+  updateLastAction();
   Serial.print("List files cursor=");
   int cursor = 0;
   if (request->hasParam("cursor")) {
@@ -87,6 +89,7 @@ void onListFiles(AsyncWebServerRequest *request)
 
 void onSelectFile(AsyncWebServerRequest *request)
 {
+  updateLastAction();
   Serial.println("Select file");
   if (request->hasParam("fileName", true))
   {
@@ -98,6 +101,7 @@ void onSelectFile(AsyncWebServerRequest *request)
 
 void onChangeVolume(AsyncWebServerRequest *request)
 {
+  updateLastAction();
   Serial.print("Volume: ");
   if (request->hasParam("modifier", true))
   {
@@ -120,12 +124,14 @@ void onChangeVolume(AsyncWebServerRequest *request)
 
 void onUpload(AsyncWebServerRequest *request)
 {
+  updateLastAction();
   Serial.println("onUpload");
   request->send(200);
 }
 
 void onUploadFile(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
 {
+  updateLastAction();
   if (!index)
   {
     Serial.printf("Upload start: %s\n", filename.c_str());

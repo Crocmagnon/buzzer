@@ -19,4 +19,9 @@ void displayStatus();
 void diagnosticPrint(String text);
 void diagnosticPrintln(String text);
 
+void deepSleep();
+
+void audio_info(const char *info);
+void updateLastAction();
+
 #endif

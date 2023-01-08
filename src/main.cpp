@@ -10,6 +10,7 @@
 
 byte buttonLastState = HIGH;
 long lastDebounceTime = 0;
+bool wasRunning = false;
 
 void setup()
 {
@@ -38,32 +39,43 @@ void setup()
   displayWifiCreds();
   displayStatus();
 
-  // Setup is done, light up the LED
-  Serial.println("All setup & ready to go!");
   setCpuFrequencyMhz(80);
+  
+  // Setup is done, light up the LED
+  delay(500);
+  Serial.println("All setup & ready to go!");
   digitalWrite(LED, HIGH);
+  updateLastAction();
+  wasRunning = audio.isRunning();
 }
 
 void loop()
 {
-  if ((millis() - lastDebounceTime) > DEBOUNCE_DELAY)
+  if ((millis() - lastDebounceTime) > DEBOUNCE_DELAY_MS)
   {
     byte buttonCurrentState = digitalRead(BUTTON);
     if (buttonCurrentState == LOW && buttonLastState == HIGH)
       play();
     buttonLastState = buttonCurrentState;
   }
-  audio.loop();
-}
 
-void audio_info(const char *info){
-  String s_info = info;
-  s_info.toLowerCase();
-  s_info.trim();
-  if (s_info == "closing audio file") {
+  audio.loop();
+
+  bool running = audio.isRunning();
+  if (running && !wasRunning)
+  {
+    wasRunning = true;
+    setCpuFrequencyMhz(240);
+  }
+  else if (!running && wasRunning)
+  {
+    wasRunning = false;
+    updateLastAction();
     setCpuFrequencyMhz(80);
   }
-  else if (s_info == "stream ready") {
-    setCpuFrequencyMhz(240);
+
+  if (!running && ((millis() - lastActionTime) > DEEP_SLEEP_DELAY_MS))
+  {
+    deepSleep();
   }
 }

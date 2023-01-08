@@ -19,8 +19,10 @@
 // GPIO
 #define LED 2
 #define BUTTON 33
+#define DEEP_SLEEP_WAKEUP GPIO_NUM_33
 
-#define DEBOUNCE_DELAY 1000
+#define DEBOUNCE_DELAY_MS 1000
+#define DEEP_SLEEP_DELAY_MS 3600000  // 1h
 
 // Screen
 #define SSD1306_NO_SPLASH
@@ -54,5 +56,6 @@ extern Adafruit_SSD1306 display;
 extern AsyncWebServer server;
 extern Audio audio;
 extern Preferences preferences;
+extern long lastActionTime;
 
 #endif
