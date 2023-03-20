@@ -23,7 +23,7 @@
 
 #define MIN_PRESS_DURATION 500
 #define NOT_PRESSED -1
-#define DEEP_SLEEP_DELAY_MS 3600000  // 1h
+#define DEEP_SLEEP_DELAY_MS 600000  // 10 min
 
 // Screen
 #define SSD1306_NO_SPLASH
