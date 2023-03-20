@@ -3,13 +3,15 @@
 #include <AsyncElegantOTA.h>
 #include <Audio.h>
 
+// config.h must come before creds loading
+// because it sets B_WIFI_AP
+#include "config.h"
 #ifdef B_WIFI_AP
 #include "creds_ap.h"
 #else
 #include "creds.h"
 #endif
 
-#include "config.h"
 #include "utils.h"
 #include "webHandlers.h"
 

@@ -3,7 +3,7 @@
 
 // Uncomment to switch to AP mode.
 // Leave commented for wifi station mode.
-// #define B_WIFI_AP
+#define B_WIFI_AP
 
 // DAC
 #define I2S_DOUT 32
