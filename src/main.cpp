@@ -36,8 +36,6 @@ void setup()
 
   displayWifiCreds();
   displayStatus();
-
-  setCpuFrequencyMhz(80);
   
   // Setup is done, light up the LED
   delay(500);
@@ -57,13 +55,11 @@ void loop()
   if (running && !wasRunning)
   {
     wasRunning = true;
-    setCpuFrequencyMhz(240);
   }
   else if (!running && wasRunning)
   {
     wasRunning = false;
     updateLastAction();
-    setCpuFrequencyMhz(80);
   }
 
   if (!running && ((millis() - lastActionTime) > DEEP_SLEEP_DELAY_MS))
