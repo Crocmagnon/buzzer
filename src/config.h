@@ -21,7 +21,8 @@
 #define BUTTON 33
 #define DEEP_SLEEP_WAKEUP GPIO_NUM_33
 
-#define DEBOUNCE_DELAY_MS 1000
+#define MIN_PRESS_DURATION 500
+#define NOT_PRESSED -1
 #define DEEP_SLEEP_DELAY_MS 3600000  // 1h
 
 // Screen
@@ -57,5 +58,7 @@ extern AsyncWebServer server;
 extern Audio audio;
 extern Preferences preferences;
 extern long lastActionTime;
+extern byte buttonLastState;
+extern long startPress;
 
 #endif

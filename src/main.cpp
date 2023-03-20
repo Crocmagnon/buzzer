@@ -8,8 +8,6 @@
 #include "utils.h"
 #include "config.h"
 
-byte buttonLastState = HIGH;
-long lastDebounceTime = 0;
 bool wasRunning = false;
 
 void setup()
@@ -51,13 +49,7 @@ void setup()
 
 void loop()
 {
-  if ((millis() - lastDebounceTime) > DEBOUNCE_DELAY_MS)
-  {
-    byte buttonCurrentState = digitalRead(BUTTON);
-    if (buttonCurrentState == LOW && buttonLastState == HIGH)
-      play();
-    buttonLastState = buttonCurrentState;
-  }
+  checkButtonAndPlay();
 
   audio.loop();
 

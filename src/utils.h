@@ -9,6 +9,7 @@ bool fileIsValid(String fileName);
 bool fileExists(String fileName);
 void clearMessageArea();
 void displayText(String text);
+void checkButtonAndPlay();
 void play();
 
 void selectFile(String fileName);

@@ -11,3 +11,5 @@ Audio audio;
 Preferences preferences;
 
 long lastActionTime = 0;
+byte buttonLastState = HIGH;
+long startPress = NOT_PRESSED;

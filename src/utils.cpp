@@ -30,6 +30,21 @@ void displayText(String text)
   display.display();
 }
 
+void checkButtonAndPlay() {
+  byte buttonCurrentState = digitalRead(BUTTON);
+  if (buttonCurrentState == HIGH && buttonLastState == LOW) {
+    startPress = millis();
+  } else if (buttonCurrentState == LOW && buttonLastState == HIGH) {
+    startPress = NOT_PRESSED;
+  }
+  long pressDuration = millis() - startPress;
+  if (startPress != NOT_PRESSED && pressDuration >= MIN_PRESS_DURATION) {
+    play();
+    startPress = NOT_PRESSED;
+  }
+  buttonLastState = buttonCurrentState;
+}
+
 void play()
 {
   updateLastAction();
